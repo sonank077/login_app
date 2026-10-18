@@ -1,0 +1,46 @@
+name: ProxyBytesVPN
+options:
+  bundleIdPrefix: com.proxybytes
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  ProxyBytesVPN:
+    type: application
+    platform: iOS
+    sources:
+      - path: ProxyBytesVPN
+    dependencies:
+      - target: ProxyBytesTunnel
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.proxybytes.vpn
+        INFOPLIST_FILE: ProxyBytesVPN/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ProxyBytesVPN/ProxyBytesVPN.entitlements
+        ENABLE_BITCODE: false
+        SWIFT_OPTIMIZATION_LEVEL: "-O"
+        CODE_SIGNING_ALLOWED: false
+        CODE_SIGNING_REQUIRED: false
+
+  ProxyBytesTunnel:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ProxyBytesTunnel
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.proxybytes.vpn.tunnel
+        INFOPLIST_FILE: ProxyBytesTunnel/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ProxyBytesTunnel/ProxyBytesTunnel.entitlements
+        ENABLE_BITCODE: false
+        SWIFT_OPTIMIZATION_LEVEL: "-O"
+        CODE_SIGNING_ALLOWED: false
+        CODE_SIGNING_REQUIRED: false

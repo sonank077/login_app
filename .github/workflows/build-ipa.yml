@@ -1,0 +1,74 @@
+name: Build ProxyBytes iOS IPA
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    name: Build & Package IPA
+    runs-on: macos-14
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Set Up Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_15.4.app || true
+
+      - name: 3. Install XcodeGen
+        run: brew install xcodegen
+
+      - name: 4. Generate Xcode Project
+        working-directory: ios
+        run: |
+          echo "[+] Running XcodeGen to generate ProxyBytesVPN.xcodeproj..."
+          xcodegen generate
+
+      - name: 5. Build iOS App (Release, Unsigned)
+        working-directory: ios
+        run: |
+          echo "[+] Compiling ProxyBytesVPN & ProxyBytesTunnel Extension..."
+          xcodebuild build \
+            -project ProxyBytesVPN.xcodeproj \
+            -scheme ProxyBytesVPN \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS=""
+
+      - name: 6. Package App into IPA
+        working-directory: ios
+        run: |
+          echo "[+] Packaging into Payload/ and compressing IPA..."
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/ProxyBytesVPN.app Payload/
+          zip -qr ProxyBytesVPN.ipa Payload
+          rm -rf Payload
+          echo "[+] ProxyBytesVPN.ipa created successfully!"
+          ls -lh ProxyBytesVPN.ipa
+
+      - name: 7. Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProxyBytesVPN-iOS
+          path: ios/ProxyBytesVPN.ipa
+          retention-days: 14
+
+      - name: 8. Create GitHub Release (If tagged)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ios/ProxyBytesVPN.ipa
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
