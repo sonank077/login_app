@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadDisplayName</key>
+    <string>ProxyBytes (103.238.234.204:8080)</string>
+    <key>PayloadDescription</key>
+    <string>Tự động cấu hình Proxy 103.238.234.204:8080 và Chứng chỉ Root CA</string>
+    <key>PayloadIdentifier</key>
+    <string>com.proxybytes.profile</string>
+    <key>PayloadOrganization</key>
+    <string>ProxyBytes</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>4B6E6A21-7D15-4F8A-9A4E-7C8B5D3E1A2F</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadContent</key>
+    <array>
+        <!-- Root Certificate -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.security.root</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.proxybytes.ca</string>
+            <key>PayloadUUID</key>
+            <string>8A1F3C5D-9E7B-4A2D-B8C6-1E4D7F9A2B5C</string>
+            <key>PayloadDisplayName</key>
+            <string>ProxyBytes Root CA</string>
+            <key>PayloadDescription</key>
+            <string>Chứng chỉ gốc ProxyBytes để giải mã và patch lưu lượng game</string>
+            <key>PayloadCertificateFileName</key>
+            <string>ProxyBytes_CA.crt</string>
+            <key>PayloadContent</key>
+            <data>
+            MIIDLzCCAhegAwIBAgIUbKGURo75jhVjOwvfxuognovu7WAwDQYJKoZIhvcNAQEL
+            BQAwPzEbMBkGA1UEAwwSUHJveHlCeXRlcyBSb290IENBMRMwEQYDVQQKDApQcm94
+            eUJ5dGVzMQswCQYDVQQGEwJWTjAeFw0yNjEwMTYxNjM1MzRaFw0zNjEwMTQxNjM1
+            MzRaMD8xGzAZBgNVBAMMElByb3h5Qnl0ZXMgUm9vdCBDQTETMBEGA1UECgwKUHJv
+            eHlCeXRlczELMAkGA1UEBhMCVk4wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+            AoIBAQCzprm9JFkauur2xID9ZhxHt0UHKEEmn009S0mW3KRW9WxnvYMhgIwjic0F
+            PRW9/a0RqHpyPX93+M0PGGw0VvAW2UNmyJQW5gh18AFVqim/ZRtYVav+b5I14jR1
+            XBAPI6V9y1V8bd8Qpj4QQUtBWW4yOGAeME1j1wY1lqfXZrQvYuIifz8PuGJDsBRO
+            RCTbYCOSVMvu5xMa5wnjwWV1dnOMOWNMYR9V8yG9Bu+kTlebwVWpdxpmJZZ/XhOT
+            UezMwIoDFvEfjHAGNIew70kH3majOcDhjgLHpw9nXM34+DVKMfJYONyFmkmbrfhN
+            GYwGH0cHANX86SF9+4zpGfF1MP1JAgMBAAGjIzAhMA8GA1UdEwEB/wQFMAMBAf8w
+            DgYDVR0PAQH/BAQDAgGGMA0GCSqGSIb3DQEBCwUAA4IBAQCd5mnKwmUTrHvCo9fw
+            XLaNC26bs7+j0Cpy1GAT9QTJzhRb9f2NRaFt08+Z7I5TtvVsgfk12H70KJevPRzA
+            EexbPsgxGs8HWvTFkGMkMCxXbQfVGF6WsFDXWkYozxKuAoEDQVIZhWbljHfuA1Sn
+            MVps6EiK4JOD1JLU8Cm+TrQ/qUcGFGrSLcX/+HdWyptN0WEqs2tZYpjR3EtKPfYD
+            MRBhLwfZnMcoGKtfl7gNQSCpRokKtbPQ9aWF+kYVy0+8iVtj7aGG2F1pgB34Z13v
+            zXgX27BCXx2g4Xgw7ZKibtzFNekimEVm/A9ob09fTexXxNHFV0WK46u7pj2O141B
+            m5MM
+            </data>
+        </dict>
+        <!-- Global HTTP/HTTPS Proxy -->
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.proxy.http.global</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.proxybytes.proxy</string>
+            <key>PayloadUUID</key>
+            <string>9F2A4B6C-8E1D-4A3C-B7F5-2D3E4F5A6B7C</string>
+            <key>PayloadDisplayName</key>
+            <string>ProxyBytes Global HTTP Proxy</string>
+            <key>PayloadDescription</key>
+            <string>Định tuyến lưu lượng qua máy chủ 103.238.234.204:8080</string>
+            <key>ProxyType</key>
+            <string>Manual</string>
+            <key>ProxyServer</key>
+            <string>103.238.234.204</string>
+            <key>ProxyServerPort</key>
+            <integer>8080</integer>
+            <key>ProxyCaptiveLoginAllowed</key>
+            <true/>
+        </dict>
+    </array>
+</dict>
+</plist>

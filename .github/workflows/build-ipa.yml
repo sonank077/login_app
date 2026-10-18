@@ -44,22 +44,33 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGN_ENTITLEMENTS=""
 
-      - name: 6. Package App into IPA
+      - name: 6. Ad-Hoc Sign & Package App into IPA
         working-directory: ios
         run: |
-          echo "[+] Packaging into Payload/ and compressing IPA..."
+          echo "[+] Preparing Payload directory..."
           mkdir -p Payload
           cp -r build/Build/Products/Release-iphoneos/ProxyBytesVPN.app Payload/
+
+          echo "[+] Applying Ad-Hoc code signature (ldid/codesign) to eliminate 'Requires Update' error..."
+          codesign -s - --force --deep --preserve-metadata=entitlements Payload/ProxyBytesVPN.app/PlugIns/ProxyBytesTunnel.appex || true
+          codesign -s - --force --deep --preserve-metadata=entitlements Payload/ProxyBytesVPN.app
+
+          echo "[+] Verifying Mach-O signature:"
+          codesign -dvvv Payload/ProxyBytesVPN.app
+
+          echo "[+] Compressing into ProxyBytesVPN.ipa..."
           zip -qr ProxyBytesVPN.ipa Payload
           rm -rf Payload
           echo "[+] ProxyBytesVPN.ipa created successfully!"
           ls -lh ProxyBytesVPN.ipa
 
-      - name: 7. Upload IPA Artifact
+      - name: 7. Upload IPA & MobileConfig Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ProxyBytesVPN-iOS
-          path: ios/ProxyBytesVPN.ipa
+          path: |
+            ios/ProxyBytesVPN.ipa
+            ios/ProxyBytes.mobileconfig
           retention-days: 14
 
       - name: 8. Create GitHub Release (If tagged)
