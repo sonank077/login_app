@@ -23,25 +23,33 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         proxySettings.exceptionList = []
         settings.proxySettings = proxySettings
         
-        // 2. Configure Virtual IP interface (required by iOS NetworkExtension)
-        let ipv4Settings = NEIPv4Settings(addresses: ["198.18.0.1"], subnetMasks: ["255.255.0.0"])
-        // Route default traffic so DNS and connections flow through the tunnel
-        ipv4Settings.includedRoutes = [NEIPv4Route.default()]
+        // 2. Configure Virtual IP interface for the tunnel
+        let ipv4Settings = NEIPv4Settings(addresses: ["198.18.0.1"], subnetMasks: ["255.255.255.0"])
+        ipv4Settings.includedRoutes = [NEIPv4Route(destinationAddress: "198.18.0.0", subnetMask: "255.255.255.0")]
         settings.ipv4Settings = ipv4Settings
         
         // 3. DNS Servers
-        let dnsSettings = NEDNSSettings(servers: ["1.1.1.1", "8.8.8.8", "1.0.0.1"])
+        let dnsSettings = NEDNSSettings(servers: ["1.1.1.1", "8.8.8.8"])
+        dnsSettings.matchDomains = [""]
         settings.dnsSettings = dnsSettings
         
         // 4. Apply settings to active iOS NetworkExtension subsystem
-        setTunnelNetworkSettings(settings) { error in
+        setTunnelNetworkSettings(settings) { [weak self] error in
             if let error = error {
                 NSLog("[ProxyBytes] [!] Failed to apply tunnel network settings: \(error.localizedDescription)")
                 completionHandler(error)
             } else {
-                NSLog("[ProxyBytes] [+] Tunnel successfully activated with Proxy \(self.proxyHost):\(self.proxyPort)")
+                NSLog("[ProxyBytes] [+] Tunnel successfully activated with Proxy \(self?.proxyHost ?? ""):\(self?.proxyPort ?? 0)")
                 completionHandler(nil)
+                self?.readPacketsContinuously()
             }
+        }
+    }
+    
+    private func readPacketsContinuously() {
+        self.packetFlow.readPackets { [weak self] packets, protocols in
+            // Keep packet flow loop alive so iOS knows the tunnel extension is responsive
+            self?.readPacketsContinuously()
         }
     }
     
