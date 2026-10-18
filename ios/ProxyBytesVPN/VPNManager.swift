@@ -75,15 +75,20 @@ class VPNManager: ObservableObject {
                 return
             }
             
+            let baseBundleId = Bundle.main.bundleIdentifier ?? "com.proxybytes.vpn"
             if let existing = managers?.first {
                 self.manager = existing
+                if let proto = existing.protocolConfiguration as? NETunnelProviderProtocol {
+                    proto.providerBundleIdentifier = "\(baseBundleId).tunnel"
+                    proto.serverAddress = "\(self.serverIP):\(self.serverPort)"
+                }
                 self.updateStatus(from: existing.connection.status)
                 self.log("Đã tìm thấy cấu hình VPN có sẵn.")
             } else {
                 self.log("Tạo cấu hình VPN mới...")
                 let newManager = NETunnelProviderManager()
                 let proto = NETunnelProviderProtocol()
-                proto.providerBundleIdentifier = "com.proxybytes.vpn.tunnel"
+                proto.providerBundleIdentifier = "\(baseBundleId).tunnel"
                 proto.serverAddress = "\(self.serverIP):\(self.serverPort)"
                 
                 newManager.protocolConfiguration = proto

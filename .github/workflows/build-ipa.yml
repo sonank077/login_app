@@ -51,12 +51,13 @@ jobs:
           mkdir -p Payload
           cp -r build/Build/Products/Release-iphoneos/ProxyBytesVPN.app Payload/
 
-          echo "[+] Applying Ad-Hoc code signature (ldid/codesign) to eliminate 'Requires Update' error..."
-          codesign -s - --force --deep --preserve-metadata=entitlements Payload/ProxyBytesVPN.app/PlugIns/ProxyBytesTunnel.appex || true
-          codesign -s - --force --deep --preserve-metadata=entitlements Payload/ProxyBytesVPN.app
+          echo "[+] Applying Ad-Hoc code signature with explicit entitlements..."
+          codesign -s - --force --entitlements ProxyBytesTunnel/ProxyBytesTunnel.entitlements Payload/ProxyBytesVPN.app/PlugIns/ProxyBytesTunnel.appex || true
+          codesign -s - --force --entitlements ProxyBytesVPN/ProxyBytesVPN.entitlements Payload/ProxyBytesVPN.app
 
-          echo "[+] Verifying Mach-O signature:"
+          echo "[+] Verifying Mach-O signature and entitlements:"
           codesign -dvvv Payload/ProxyBytesVPN.app
+          codesign -d --entitlements :- Payload/ProxyBytesVPN.app
 
           echo "[+] Compressing into ProxyBytesVPN.ipa..."
           zip -qr ProxyBytesVPN.ipa Payload
