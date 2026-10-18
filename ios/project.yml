@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.proxybytes
   deploymentTarget:
     iOS: "15.0"
+  projectFormat: xcode15_3
 
 settings:
   base:
