@@ -271,7 +271,25 @@ struct ContentView: View {
                             }
                         }
                         
-                        // Expandable Guide
+                        Button(action: {
+                            vpn.openMobileConfigDownload()
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "bolt.shield.fill")
+                                    .font(.system(size: 13))
+                                Text("Cài Đặt Cấu Hình Tự Động (Khuyên Dùng)")
+                                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.blue.opacity(0.2))
+                            .foregroundColor(.cyan)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.cyan.opacity(0.5), lineWidth: 1)
+                            )
+                        }
                         DisclosureGroup("Xem hướng dẫn bật Tin Cậy Chứng Chỉ", isExpanded: $showCertGuide) {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("• Bước 1: Bấm 'Tải Chứng Chỉ' qua Safari, chọn 'Cho phép'.")
