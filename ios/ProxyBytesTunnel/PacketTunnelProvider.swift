@@ -1,12 +1,12 @@
 import Foundation
 import NetworkExtension
 
-class PacketTunnelProvider: NEPacketTunnelProvider {
+final class PacketTunnelProvider: NEPacketTunnelProvider {
     private let proxyHost = "103.238.234.204"
     private let proxyPort = 8080
 
     override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
-        NSLog("[ProxyBytes] >>> Starting Packet Tunnel to \(proxyHost):\(proxyPort)")
+        NSLog("[ProxyBytes] Starting Packet Tunnel -> \(proxyHost):\(proxyPort)")
 
         let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "127.0.0.1")
         settings.mtu = 1280
@@ -39,35 +39,33 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         setTunnelNetworkSettings(settings) { [weak self] error in
             if let error = error {
-                NSLog("[ProxyBytes] [!] Failed to apply tunnel network settings: \(error.localizedDescription)")
+                NSLog("[ProxyBytes] Failed to apply network settings: \(error.localizedDescription)")
                 completionHandler(error)
                 return
             }
 
-            NSLog("[ProxyBytes] [+] Tunnel successfully activated with Proxy \(self?.proxyHost ?? ""):\(self?.proxyPort ?? 0)")
+            NSLog("[ProxyBytes] Tunnel activated")
             completionHandler(nil)
             self?.readPacketsContinuously()
         }
     }
 
     private func readPacketsContinuously() {
-        packetFlow.readPackets { [weak self] packets, protocols in
-            _ = packets
-            _ = protocols
+        packetFlow.readPackets { [weak self] _, _ in
             self?.readPacketsContinuously()
         }
     }
 
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        NSLog("[ProxyBytes] >>> Stopping Packet Tunnel (reason: \(reason.rawValue))")
+        NSLog("[ProxyBytes] Stopping tunnel: \(reason.rawValue)")
         completionHandler()
     }
 
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
         if let command = String(data: messageData, encoding: .utf8), command == "PING" {
             completionHandler?("PONG".data(using: .utf8))
-        } else {
-            completionHandler?(nil)
+            return
         }
+        completionHandler?(nil)
     }
 }
