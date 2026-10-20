@@ -2,17 +2,27 @@ import Foundation
 import NetworkExtension
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
-    
-    // Server Host and Port hardcoded for instant 1-tap connection
     private let proxyHost = "103.238.234.204"
     private let proxyPort = 8080
-    
-    override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
+
+    override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         NSLog("[ProxyBytes] >>> Starting Packet Tunnel to \(proxyHost):\(proxyPort)")
-        
-        let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: proxyHost)
-        
-        // 1. Configure system-wide HTTP and HTTPS Proxy settings
+
+        let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "127.0.0.1")
+        settings.mtu = 1280
+
+        let ipv4Settings = NEIPv4Settings(addresses: ["198.18.0.1"], subnetMasks: ["255.255.255.0"])
+        ipv4Settings.includedRoutes = [
+            NEIPv4Route(destinationAddress: "0.0.0.0", subnetMask: "0.0.0.0")
+        ]
+        ipv4Settings.excludedRoutes = [
+            NEIPv4Route(destinationAddress: "10.0.0.0", subnetMask: "255.0.0.0"),
+            NEIPv4Route(destinationAddress: "172.16.0.0", subnetMask: "255.240.0.0"),
+            NEIPv4Route(destinationAddress: "192.168.0.0", subnetMask: "255.255.0.0"),
+            NEIPv4Route(destinationAddress: "169.254.0.0", subnetMask: "255.255.0.0")
+        ]
+        settings.ipv4Settings = ipv4Settings
+
         let proxySettings = NEProxySettings()
         proxySettings.httpServer = NEProxyServer(address: proxyHost, port: proxyPort)
         proxySettings.httpsServer = NEProxyServer(address: proxyHost, port: proxyPort)
@@ -22,46 +32,40 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         proxySettings.excludeSimpleHostnames = false
         proxySettings.exceptionList = []
         settings.proxySettings = proxySettings
-        
-        // 2. Configure Virtual IP interface for the tunnel
-        let ipv4Settings = NEIPv4Settings(addresses: ["198.18.0.1"], subnetMasks: ["255.255.255.0"])
-        ipv4Settings.includedRoutes = [NEIPv4Route(destinationAddress: "198.18.0.0", subnetMask: "255.255.255.0")]
-        settings.ipv4Settings = ipv4Settings
-        
-        // 3. DNS Servers
+
         let dnsSettings = NEDNSSettings(servers: ["1.1.1.1", "8.8.8.8"])
         dnsSettings.matchDomains = [""]
         settings.dnsSettings = dnsSettings
-        
-        // 4. Apply settings to active iOS NetworkExtension subsystem
+
         setTunnelNetworkSettings(settings) { [weak self] error in
             if let error = error {
                 NSLog("[ProxyBytes] [!] Failed to apply tunnel network settings: \(error.localizedDescription)")
                 completionHandler(error)
-            } else {
-                NSLog("[ProxyBytes] [+] Tunnel successfully activated with Proxy \(self?.proxyHost ?? ""):\(self?.proxyPort ?? 0)")
-                completionHandler(nil)
-                self?.readPacketsContinuously()
+                return
             }
-        }
-    }
-    
-    private func readPacketsContinuously() {
-        self.packetFlow.readPackets { [weak self] packets, protocols in
-            // Keep packet flow loop alive so iOS knows the tunnel extension is responsive
+
+            NSLog("[ProxyBytes] [+] Tunnel successfully activated with Proxy \(self?.proxyHost ?? ""):\(self?.proxyPort ?? 0)")
+            completionHandler(nil)
             self?.readPacketsContinuously()
         }
     }
-    
+
+    private func readPacketsContinuously() {
+        packetFlow.readPackets { [weak self] packets, protocols in
+            _ = packets
+            _ = protocols
+            self?.readPacketsContinuously()
+        }
+    }
+
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         NSLog("[ProxyBytes] >>> Stopping Packet Tunnel (reason: \(reason.rawValue))")
         completionHandler()
     }
-    
+
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
         if let command = String(data: messageData, encoding: .utf8), command == "PING" {
-            let response = "PONG".data(using: .utf8)
-            completionHandler?(response)
+            completionHandler?("PONG".data(using: .utf8))
         } else {
             completionHandler?(nil)
         }
